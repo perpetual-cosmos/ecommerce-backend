@@ -43,6 +43,20 @@ const connectDB = async () => {
 };
 
 
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    console.log('📴 MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+    process.exit(1);
+  }
+});
+
+// Initialize database connection
+connectDB();
 
 app.listen(5000, () => {
   console.log('🚀 Server running on port 5000');
