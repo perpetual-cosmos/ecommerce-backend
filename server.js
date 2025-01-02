@@ -1,13 +1,13 @@
 require('dotenv').config();
-// const express = require('express');
-// const cors = require('cors');
-// const mongoose = require('mongoose');
-// const authRoutes = require('./routes/auth');
-// const productRoutes = require('./routes/product');
-// const orderRoutes = require('./routes/order');
-// const paymentRoutes = require('./routes/payment');
-// const imageRoutes = require('./routes/image');
-// const Stripe = require('stripe');
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/product');
+const orderRoutes = require('./routes/order');
+const paymentRoutes = require('./routes/payment');
+const imageRoutes = require('./routes/image');
+const Stripe = require('stripe');
 
 const app = express();
 app.use(cors());
@@ -42,6 +42,18 @@ const connectDB = async () => {
   }
 };
 
+// MongoDB connection event listeners
+mongoose.connection.on('connected', () => {
+  console.log('🎉 Mongoose connected to MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️  Mongoose disconnected from MongoDB');
+});
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
