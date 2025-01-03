@@ -68,7 +68,12 @@ const testConnection = async () => {
     console.error('3. Check network connectivity');
     console.error('4. Ensure MongoDB port (27017) is accessible');
     
-    
+    if (error.message.includes('ECONNREFUSED')) {
+      console.error('\n💡 MongoDB might not be running. Start it with:');
+      console.error('   - Windows: Start MongoDB service');
+      console.error('   - Mac/Linux: sudo systemctl start mongod');
+      console.error('   - Or use MongoDB Atlas cloud database');
+    }
     
     if (error.message.includes('Authentication failed')) {
       console.error('\n💡 Authentication error. Check username/password in MONGO_URI');
