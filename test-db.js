@@ -24,7 +24,17 @@ const testConnection = async () => {
     // Test database operations
     console.log('\n🧪 Testing Database Operations...\n');
     
-
+    // Test User collection
+    const userCount = await User.countDocuments();
+    console.log(`👥 Users in database: ${userCount}`);
+    
+    // Test Product collection
+    const productCount = await Product.countDocuments();
+    console.log(`📦 Products in database: ${productCount}`);
+    
+    // Test Order collection
+    const orderCount = await Order.countDocuments();
+    console.log(`🛒 Orders in database: ${orderCount}`);
     
     // Test creating a sample user
     console.log('\n📝 Testing User Creation...');
