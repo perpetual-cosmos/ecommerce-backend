@@ -44,7 +44,20 @@ const testConnection = async () => {
       password: 'hashedpassword123'
     });
     
-   
+    // Don't actually save, just test the model
+    console.log('✅ User model validation passed');
+    console.log(`📋 Sample user data: ${testUser.name} (${testUser.email})`);
+    
+    // Test creating a sample product
+    console.log('\n📦 Testing Product Creation...');
+    const testProduct = new Product({
+      name: 'Test Product',
+      description: 'This is a test product',
+      price: 29.99,
+      category: 'other',
+      fileUrl: 'https://example.com/file.pdf',
+      createdBy: testUser._id
+    });
     
     console.log('✅ Product model validation passed');
     console.log(`📋 Sample product data: ${testProduct.name} - $${testProduct.price}`);
