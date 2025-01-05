@@ -48,7 +48,15 @@ const productSchema = new mongoose.Schema({
     type: Number, 
     default: 0 
   },
-  
+  isActive: { 
+    type: Boolean, 
+    default: true 
+  },
+  createdBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
+  }
 }, {
   timestamps: true
 });
