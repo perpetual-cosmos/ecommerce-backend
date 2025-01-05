@@ -23,7 +23,20 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
- 
+  offer_price: {
+    type: Number,
+    min: 0
+  },
+  category: { 
+    type: String, 
+    required: true,
+    enum: ['ebook', 'software', 'template', 'course', 'other'],
+    default: 'other'
+  },
+  fileUrl: { 
+    type: String, 
+    required: true 
+  },
  
   
 }, {
