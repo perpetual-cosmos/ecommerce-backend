@@ -37,7 +37,17 @@ const productSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
- 
+  imageUrl: {
+    type: String,
+    required: false // Not required for legacy products, but will be used for new ones
+  },
+  fileSize: { 
+    type: Number 
+  },
+  downloadCount: { 
+    type: Number, 
+    default: 0 
+  },
   
 }, {
   timestamps: true
