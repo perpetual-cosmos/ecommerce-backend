@@ -27,7 +27,16 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'completed', 'failed', 'refunded'], 
     default: 'pending' 
   },
-
+  downloadToken: { 
+    type: String 
+  },
+  downloadCount: { 
+    type: Number, 
+    default: 0 
+  },
+  lastDownloaded: { 
+    type: Date 
+  },
 
 }, {
   timestamps: true
