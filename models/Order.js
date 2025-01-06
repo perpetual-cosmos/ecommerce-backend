@@ -37,7 +37,12 @@ const orderSchema = new mongoose.Schema({
   lastDownloaded: { 
     type: Date 
   },
-
+  paymentMethod: { 
+    type: String 
+  },
+  billingEmail: { 
+    type: String 
+  }
 }, {
   timestamps: true
 });
