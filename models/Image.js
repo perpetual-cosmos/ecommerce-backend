@@ -22,7 +22,14 @@ const imageSchema = new mongoose.Schema({
     trim: true,
     maxlength: 200
   },
-  
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  sortOrder: {
+    type: Number,
+    default: 0
+  }
 }, {
   timestamps: true
 });
