@@ -81,6 +81,49 @@ router.post('/register', validateRegistration, async (req, res) => {
   }
 });
 
+// Verify email endpoint
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    // Find user with this verification token
+    const user = await User.findOne({ 
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+    
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired verification token' 
+      });
+    }
+    
+    // Mark email as verified
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+    
+    // Send welcome email
+    const welcomeResult = await sendWelcomeEmail(user);
+    if (!welcomeResult.success) {
+      console.error('Failed to send welcome email:', welcomeResult.error);
+    }
+    
+    res.json({ 
+      message: 'Email verified successfully! You can now log in to your account.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({ message: 'Server error during email verification' });
+  }
+});
 
 
 
