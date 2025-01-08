@@ -125,6 +125,49 @@ router.get('/verify-email/:token', async (req, res) => {
   }
 });
 
+// Resend verification email
+router.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (user.isEmailVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
+    
+    // Generate new verification token
+    const verificationToken = uuidv4();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = verificationExpires;
+    await user.save();
+    
+    // Send verification email
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const emailResult = await sendVerificationEmail(user, verificationUrl);
+    
+    if (!emailResult.success) {
+      return res.status(500).json({ message: 'Failed to send verification email' });
+    }
+    
+    res.json({ 
+      message: 'Verification email sent successfully. Please check your inbox.',
+      emailSent: true
+    });
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({ message: 'Server error sending verification email' });
+  }
+});
 
 
 
