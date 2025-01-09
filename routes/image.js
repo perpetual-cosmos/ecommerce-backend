@@ -100,7 +100,37 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-
+// Update image (admin only)
+router.put('/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { imageType, altText, sortOrder, isActive } = req.body;
+    
+    const image = await Image.findById(req.params.id);
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+    
+    // Update fields
+    if (imageType) image.imageType = imageType;
+    if (altText !== undefined) image.altText = altText;
+    if (sortOrder !== undefined) image.sortOrder = sortOrder;
+    if (isActive !== undefined) image.isActive = isActive;
+    
+    await image.save();
+    
+    res.json({ 
+      message: 'Image updated successfully',
+      image
+    });
+  } catch (error) {
+    console.error('Image update error:', error);
+    res.status(500).json({ message: 'Server error updating image' });
+  }
+});
 
 
 
