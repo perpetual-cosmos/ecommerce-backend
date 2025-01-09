@@ -155,6 +155,61 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-
+// Bulk upload images for a product (admin only)
+router.post('/bulk', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { product_id, images } = req.body;
+    
+    if (!product_id || !images || !Array.isArray(images)) {
+      return res.status(400).json({ message: 'Product ID and images array are required' });
+    }
+    
+    // Verify product exists
+    const product = await Product.findOne({ product_id });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    const uploadedImages = [];
+    
+    for (const imageData of images) {
+      const { imageFile, imageType = 'gallery', altText, sortOrder = 0 } = imageData;
+      
+      if (!imageFile) continue;
+      
+      // Upload image to Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(imageFile, { 
+        resource_type: 'image',
+        folder: 'product-images',
+        transformation: [
+          { width: 800, height: 600, crop: 'limit' }
+        ]
+      });
+      
+      const image = new Image({
+        product_id,
+        imageUrl: uploadResult.secure_url,
+        imageType,
+        altText,
+        sortOrder
+      });
+      
+      await image.save();
+      uploadedImages.push(image);
+    }
+    
+    res.status(201).json({ 
+      message: `${uploadedImages.length} images uploaded successfully`,
+      images: uploadedImages
+    });
+  } catch (error) {
+    console.error('Bulk image upload error:', error);
+    res.status(500).json({ message: 'Server error uploading images' });
+  }
+});
 
 module.exports = router; 
