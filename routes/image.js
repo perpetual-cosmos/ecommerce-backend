@@ -28,6 +28,30 @@ router.get('/product/:product_id', async (req, res) => {
   }
 });
 
+// Get images by type for a product
+router.get('/product/:product_id/:imageType', async (req, res) => {
+  try {
+    const { product_id, imageType } = req.params;
+    
+    // Verify product exists
+    const product = await Product.findOne({ product_id, isActive: true });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    const images = await Image.find({ 
+      product_id, 
+      imageType, 
+      isActive: true 
+    }).sort({ sortOrder: 1, createdAt: 1 });
+    
+    res.json(images);
+  } catch (error) {
+    console.error('Image fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching images' });
+  }
+});
+
 
 
 
