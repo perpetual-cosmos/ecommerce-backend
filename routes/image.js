@@ -132,6 +132,29 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// Delete image (admin only)
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const image = await Image.findById(req.params.id);
+    if (!image) {
+      return res.status(404).json({ message: 'Image not found' });
+    }
+    
+    // Soft delete - set isActive to false
+    image.isActive = false;
+    await image.save();
+    
+    res.json({ message: 'Image deleted successfully' });
+  } catch (error) {
+    console.error('Image deletion error:', error);
+    res.status(500).json({ message: 'Server error deleting image' });
+  }
+});
+
 
 
 module.exports = router; 
