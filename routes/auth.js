@@ -253,6 +253,40 @@ router.get('/profile', require('../middleware/auth'), async (req, res) => {
   }
 });
 
-
+// Update user profile
+router.put('/profile', require('../middleware/auth'), async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const user = await User.findById(req.user.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (name) user.name = name;
+    if (email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: user._id } });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+      user.email = email;
+    }
+    
+    await user.save();
+    
+    res.json({ 
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Server error updating profile' });
+  }
+});
 
 module.exports = router;
