@@ -87,6 +87,29 @@ router.get('/my-orders', auth, async (req, res) => {
   }
 });
 
+// Get single order details
+router.get('/:orderId', auth, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId)
+      .populate('product', 'name price category description')
+      .populate('user', 'name email');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    // Check if user owns this order or is admin
+    if (order.user._id.toString() !== req.user.userId && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
+    res.json(order);
+  } catch (error) {
+    console.error('Order fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching order' });
+  }
+});
+
 
 
 module.exports = router;
