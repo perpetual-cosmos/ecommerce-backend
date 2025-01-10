@@ -110,6 +110,40 @@ router.get('/:orderId', auth, async (req, res) => {
   }
 });
 
+// Download digital product
+router.get('/download/:token', async (req, res) => {
+  try {
+    const order = await Order.findOne({ downloadToken: req.params.token })
+      .populate('product', 'fileUrl name');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Download link not found' });
+    }
+    
+    if (order.status !== 'completed') {
+      return res.status(403).json({ message: 'Order not completed' });
+    }
+    
+    if (!order.downloadToken) {
+      return res.status(403).json({ message: 'Download link has already been used' });
+    }
+    
+    // Update download count and timestamp
+    order.downloadCount += 1;
+    order.lastDownloaded = new Date();
+    
+    // Invalidate token after first use (one-time download)
+    order.downloadToken = null;
+    await order.save();
+    
+    // Redirect to Cloudinary URL for download
+    res.redirect(order.product.fileUrl);
+  } catch (error) {
+    console.error('Download error:', error);
+    res.status(500).json({ message: 'Server error processing download' });
+  }
+});
+
 
 
 module.exports = router;
