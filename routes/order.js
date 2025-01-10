@@ -73,6 +73,20 @@ router.post('/create', auth, async (req, res) => {
   }
 });
 
+// Get user's order history
+router.get('/my-orders', auth, async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user.userId })
+      .populate('product', 'name price category')
+      .sort({ createdAt: -1 });
+    
+    res.json(orders);
+  } catch (error) {
+    console.error('Order history fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching order history' });
+  }
+});
+
 
 
 module.exports = router;
