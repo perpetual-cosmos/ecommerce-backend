@@ -144,6 +144,47 @@ router.get('/download/:token', async (req, res) => {
   }
 });
 
+// Get all orders (admin only)
+router.get('/admin/all', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { status, page = 1, limit = 20 } = req.query;
+    
+    let query = {};
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+    
+    const skip = (page - 1) * limit;
+    
+    const orders = await Order.find(query)
+      .populate('user', 'name email')
+      .populate('product', 'name price category')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Order.countDocuments(query);
+    
+    res.json({
+      orders,
+      pagination: {
+        current: parseInt(page),
+        total: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    });
+  } catch (error) {
+    console.error('Admin orders fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching admin orders' });
+  }
+});
+
+
 
 
 module.exports = router;
