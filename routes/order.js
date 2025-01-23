@@ -184,6 +184,36 @@ router.get('/admin/all', auth, async (req, res) => {
   }
 });
 
+// Update order status (admin only)
+router.put('/admin/:orderId/status', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { status } = req.body;
+    
+    if (!['pending', 'completed', 'failed', 'refunded'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+    
+    const order = await Order.findById(req.params.orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    order.status = status;
+    await order.save();
+    
+    res.json({ 
+      message: 'Order status updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Order status update error:', error);
+    res.status(500).json({ message: 'Server error updating order status' });
+  }
+});
 
 
 
