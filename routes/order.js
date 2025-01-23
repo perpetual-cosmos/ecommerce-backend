@@ -215,6 +215,36 @@ router.put('/admin/:orderId/status', auth, async (req, res) => {
   }
 });
 
-
+// Get order statistics (admin only)
+router.get('/admin/stats', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const totalOrders = await Order.countDocuments();
+    const completedOrders = await Order.countDocuments({ status: 'completed' });
+    const totalRevenue = await Order.aggregate([
+      { $match: { status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    
+    const recentOrders = await Order.find()
+      .populate('user', 'name')
+      .populate('product', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
+    res.json({
+      totalOrders,
+      completedOrders,
+      totalRevenue: totalRevenue[0]?.total || 0,
+      recentOrders
+    });
+  } catch (error) {
+    console.error('Order stats error:', error);
+    res.status(500).json({ message: 'Server error fetching order statistics' });
+  }
+});
 
 module.exports = router;
