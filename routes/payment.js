@@ -131,7 +131,17 @@ router.post('/confirm-payment', auth, async (req, res) => {
   }
 });
 
-
+// Get payment methods for user
+router.get('/payment-methods', auth, async (req, res) => {
+  try {
+    // In a real application, you would store customer IDs
+    // For now, we'll return an empty array
+    res.json({ paymentMethods: [] });
+  } catch (error) {
+    console.error('Payment methods fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching payment methods' });
+  }
+});
 
 
 
