@@ -86,6 +86,51 @@ router.post('/create-payment-intent', auth, async (req, res) => {
   }
 });
 
+// Confirm payment and create order
+router.post('/confirm-payment', auth, async (req, res) => {
+  try {
+    const { paymentIntentId, productId } = req.body;
+    
+    if (!paymentIntentId || !productId) {
+      return res.status(400).json({ message: 'Payment intent ID and product ID are required' });
+    }
+    
+    // Verify payment intent
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({ message: 'Payment not completed' });
+    }
+    
+    // Verify product
+    const product = await Product.findById(productId).where('isActive', true);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found or inactive' });
+    }
+    
+    // Check if order already exists
+    const existingOrder = await Order.findOne({
+      user: req.user.userId,
+      product: productId,
+      paymentId: paymentIntentId
+    });
+    
+    if (existingOrder) {
+      return res.status(400).json({ message: 'Order already exists for this payment' });
+    }
+    
+    // Create order (this will be handled by the order creation route)
+    res.json({ 
+      message: 'Payment confirmed successfully',
+      paymentIntentId,
+      productId
+    });
+  } catch (error) {
+    console.error('Payment confirmation error:', error);
+    res.status(500).json({ message: 'Server error confirming payment' });
+  }
+});
+
 
 
 
