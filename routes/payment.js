@@ -176,5 +176,23 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   res.json({ received: true });
 });
 
+// Get payment status
+router.get('/status/:paymentIntentId', auth, async (req, res) => {
+  try {
+    const { paymentIntentId } = req.params;
+    
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    res.json({
+      status: paymentIntent.status,
+      amount: paymentIntent.amount / 100,
+      currency: paymentIntent.currency,
+      created: paymentIntent.created
+    });
+  } catch (error) {
+    console.error('Payment status fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching payment status' });
+  }
+});
 
 module.exports = router;
