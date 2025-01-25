@@ -195,4 +195,36 @@ router.get('/status/:paymentIntentId', auth, async (req, res) => {
   }
 });
 
+// Refund payment (admin only)
+router.post('/refund/:paymentIntentId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { paymentIntentId } = req.params;
+    const { reason } = req.body;
+    
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      reason: reason || 'requested_by_customer'
+    });
+    
+    // Update order status
+    const order = await Order.findOne({ paymentId: paymentIntentId });
+    if (order) {
+      order.status = 'refunded';
+      await order.save();
+    }
+    
+    res.json({ 
+      message: 'Refund processed successfully',
+      refund
+    });
+  } catch (error) {
+    console.error('Refund error:', error);
+    res.status(500).json({ message: 'Server error processing refund' });
+  }
+});
+
 module.exports = router;
