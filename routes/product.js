@@ -75,6 +75,63 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Create new product (admin only)
+router.post('/', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { product_id, name, description, price, offer_price, category, file } = req.body;
+    
+    if (!product_id || !name || !description || !price || !category || !file) {
+      return res.status(400).json({ message: 'All required fields are missing' });
+    }
+    
+    if (price <= 0) {
+      return res.status(400).json({ message: 'Price must be greater than 0' });
+    }
+    
+    if (offer_price && offer_price <= 0) {
+      return res.status(400).json({ message: 'Offer price must be greater than 0' });
+    }
+    
+    // Check if product_id already exists
+    const existingProduct = await Product.findOne({ product_id });
+    if (existingProduct) {
+      return res.status(400).json({ message: 'Product ID already exists' });
+    }
+    
+    // Upload file to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(file, { 
+      resource_type: 'raw',
+      folder: 'digital-products'
+    });
+    
+    const product = new Product({
+      product_id,
+      name,
+      description,
+      price,
+      offer_price,
+      category,
+      fileUrl: uploadResult.secure_url,
+      fileSize: uploadResult.bytes,
+      createdBy: req.user.userId
+    });
+    
+    await product.save();
+    
+    res.status(201).json({ 
+      message: 'Product created successfully',
+      product
+    });
+  } catch (error) {
+    console.error('Product creation error:', error);
+    res.status(500).json({ message: 'Server error creating product' });
+  }
+});
+
 
 
 
