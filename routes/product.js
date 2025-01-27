@@ -185,6 +185,28 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// Delete product (admin only)
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    // Soft delete - set isActive to false
+    product.isActive = false;
+    await product.save();
+    
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Product deletion error:', error);
+    res.status(500).json({ message: 'Server error deleting product' });
+  }
+});
 
 
 
