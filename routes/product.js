@@ -132,6 +132,59 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// Update product (admin only)
+router.put('/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const { product_id, name, description, price, offer_price, category, isActive } = req.body;
+    
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
+    // Check if product_id is being updated and if it already exists
+    if (product_id && product_id !== product.product_id) {
+      const existingProduct = await Product.findOne({ product_id });
+      if (existingProduct) {
+        return res.status(400).json({ message: 'Product ID already exists' });
+      }
+    }
+    
+    // Update fields
+    if (product_id) product.product_id = product_id;
+    if (name) product.name = name;
+    if (description) product.description = description;
+    if (price !== undefined) {
+      if (price <= 0) {
+        return res.status(400).json({ message: 'Price must be greater than 0' });
+      }
+      product.price = price;
+    }
+    if (offer_price !== undefined) {
+      if (offer_price && offer_price <= 0) {
+        return res.status(400).json({ message: 'Offer price must be greater than 0' });
+      }
+      product.offer_price = offer_price;
+    }
+    if (category) product.category = category;
+    if (isActive !== undefined) product.isActive = isActive;
+    
+    await product.save();
+    
+    res.json({ 
+      message: 'Product updated successfully',
+      product
+    });
+  } catch (error) {
+    console.error('Product update error:', error);
+    res.status(500).json({ message: 'Server error updating product' });
+  }
+});
+
 
 
 
