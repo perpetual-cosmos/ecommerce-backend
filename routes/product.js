@@ -208,6 +208,17 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// Get product categories
+router.get('/categories/list', async (req, res) => {
+  try {
+    const categories = await Product.distinct('category', { isActive: true });
+    res.json(categories);
+  } catch (error) {
+    console.error('Categories fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching categories' });
+  }
+});
+
 
 
 module.exports = router;
