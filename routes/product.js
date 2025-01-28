@@ -219,6 +219,22 @@ router.get('/categories/list', async (req, res) => {
   }
 });
 
-
+// Get admin products (admin only)
+router.get('/admin/all', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    const products = await Product.find()
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 });
+    
+    res.json(products);
+  } catch (error) {
+    console.error('Admin products fetch error:', error);
+    res.status(500).json({ message: 'Server error fetching admin products' });
+  }
+});
 
 module.exports = router;
