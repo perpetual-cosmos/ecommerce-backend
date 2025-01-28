@@ -180,6 +180,14 @@ const sendEmail = async (to, template, data = {}) => {
   }
 };
 
+// Send verification email
+const sendVerificationEmail = async (user, verificationUrl) => {
+  return await sendEmail(user.email, 'verificationEmail', {
+    name: user.name,
+    verificationUrl: verificationUrl
+  });
+};
+
 
 
 module.exports = {
