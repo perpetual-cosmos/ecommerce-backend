@@ -156,7 +156,29 @@ const emailTemplates = {
   })
 };
 
-
+// Send email function
+const sendEmail = async (to, template, data = {}) => {
+  try {
+    const transporter = createTransporter();
+    const emailContent = emailTemplates[template](data.name, data.verificationUrl);
+    
+    const mailOptions = {
+      from: `"DigitalStore" <${process.env.EMAIL_USER}>`,
+      to: to,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text
+    };
+    
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+    
+  } catch (error) {
+    console.error('❌ Email sending failed:', error);
+    return { success: false, error: error.message };
+  }
+};
 
 
 
