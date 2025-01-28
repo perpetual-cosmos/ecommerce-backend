@@ -188,7 +188,12 @@ const sendVerificationEmail = async (user, verificationUrl) => {
   });
 };
 
-
+// Send welcome email
+const sendWelcomeEmail = async (user) => {
+  return await sendEmail(user.email, 'welcomeEmail', {
+    name: user.name
+  });
+};
 
 module.exports = {
   sendEmail,
