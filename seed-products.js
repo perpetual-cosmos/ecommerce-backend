@@ -63,7 +63,7 @@ async function seed() {
     user = new User({
       name: 'Seed User',
       email: DUMMY_USER_EMAIL,
-      password: 'hashedpassword123', // You may want to hash this in a real app
+      password: 'hashedpassword123',
       isVerified: true,
     });
     await user.save();
