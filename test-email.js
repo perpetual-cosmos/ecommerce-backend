@@ -97,7 +97,12 @@ async function testEmailConfig() {
       console.log('4. Make sure "Less secure app access" is enabled (if not using App Password)');
     }
     
-   
+    if (error.code === 'ECONNECTION') {
+      console.log('\n🔧 Troubleshooting Tips:');
+      console.log('1. Check your internet connection');
+      console.log('2. Verify Gmail SMTP settings');
+      console.log('3. Try using a different email service');
+    }
   }
 }
 
