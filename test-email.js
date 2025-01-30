@@ -74,7 +74,17 @@ async function testEmailConfig() {
       `
     };
 
-  
+    const info = await transporter.sendMail(testEmail);
+    console.log('✅ Test email sent successfully!');
+    console.log(`📧 Message ID: ${info.messageId}`);
+    console.log(`📬 Check your inbox: ${process.env.EMAIL_USER}\n`);
+
+    console.log('🎯 Next Steps:');
+    console.log('1. Check your email inbox for the test email');
+    console.log('2. If you received it, your configuration is working!');
+    console.log('3. Start your backend server: npm run dev');
+    console.log('4. Test the full registration flow at http://localhost:3000/register');
+
   } catch (error) {
     console.log('❌ Email test failed:');
     console.log(error.message);
