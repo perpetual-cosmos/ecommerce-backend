@@ -89,7 +89,13 @@ async function testEmailConfig() {
     console.log('❌ Email test failed:');
     console.log(error.message);
     
-  
+    if (error.code === 'EAUTH') {
+      console.log('\n🔧 Troubleshooting Tips:');
+      console.log('1. Check if your email and password are correct');
+      console.log('2. Ensure 2-Factor Authentication is enabled on your Gmail account');
+      console.log('3. Generate an App Password and use it instead of your regular password');
+      console.log('4. Make sure "Less secure app access" is enabled (if not using App Password)');
+    }
     
    
   }
